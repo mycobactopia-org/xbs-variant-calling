@@ -3,7 +3,7 @@
     XBS_VARIANT_CALLING
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Top-level composer of the XBS spine: glues XBS_PER_SAMPLE
-    (stages 1–7) to XBS_COHORT_VQSR (stages 8–12).
+    (stages 1–7) to XBS_COHORT (stages 8–12).
 
     This is the subworkflow that other pipelines (MAGMA, future
     NF_CORE_TBANALYZER, M. bovis / other bacterial pipelines) import
@@ -11,7 +11,7 @@
 */
 
 include { XBS_PER_SAMPLE   } from './xbs_per_sample'
-include { XBS_COHORT_VQSR  } from './xbs_cohort_vqsr'
+include { XBS_COHORT  } from './xbs_cohort'
 
 
 workflow XBS_VARIANT_CALLING {
@@ -27,7 +27,7 @@ workflow XBS_VARIANT_CALLING {
 
     XBS_PER_SAMPLE(ch_reads, ch_reference, ch_dbsnp)
 
-    XBS_COHORT_VQSR(
+    XBS_COHORT(
         XBS_PER_SAMPLE.out.gvcf_vcf,
         XBS_PER_SAMPLE.out.gvcf_tbi,
         ch_reference,
@@ -45,8 +45,8 @@ workflow XBS_VARIANT_CALLING {
     markdup_metrics    = XBS_PER_SAMPLE.out.markdup_metrics
 
     // cohort outputs (the XBS primary deliverables)
-    raw_variants       = XBS_COHORT_VQSR.out.raw_variants
-    snp_filtered       = XBS_COHORT_VQSR.out.snp_filtered
-    indel_filtered     = XBS_COHORT_VQSR.out.indel_filtered
-    vqsr_diagnostics   = XBS_COHORT_VQSR.out.vqsr_diagnostics
+    raw_variants       = XBS_COHORT.out.raw_variants
+    snp_filtered       = XBS_COHORT.out.snp_filtered
+    indel_filtered     = XBS_COHORT.out.indel_filtered
+    vqsr_diagnostics   = XBS_COHORT.out.vqsr_diagnostics
 }

@@ -1,6 +1,6 @@
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    XBS_COHORT_VQSR
+    XBS_COHORT
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Cohort-level joint calling + VQSR — the core Heupink 2021 step that
     enables low-coverage / contaminated-sample variant calling at scale.
@@ -25,7 +25,7 @@ include { GATK4_APPLYVQSR as GATK4_APPLYVQSR_SNP                            } fr
 include { GATK4_APPLYVQSR as GATK4_APPLYVQSR_INDEL                          } from '../../modules/nf-core/gatk4/applyvqsr/main'
 
 
-workflow XBS_COHORT_VQSR {
+workflow XBS_COHORT {
 
     take:
     ch_gvcf_vcf       // channel: [ per_sample_meta, *.g.vcf.gz ]
