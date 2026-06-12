@@ -1,0 +1,4 @@
+study,sample,library,attempt,flowcell,lane,index_sequence,r1,r2
+EXITRIF,SRR26331590,1,1,UNNAMED,1,ATGCATGC,https://ftp.sra.ebi.ac.uk/vol1/fastq/SRR263/090/SRR26331590/SRR26331590_1.fastq.gz,https://ftp.sra.ebi.ac.uk/vol1/fastq/SRR263/090/SRR26331590/SRR26331590_2.fastq.gz
+EXITRIF,SRR26331595,1,1,UNNAMED,1,ATGCATGC,https://ftp.sra.ebi.ac.uk/vol1/fastq/SRR263/095/SRR26331595/SRR26331595_1.fastq.gz,https://ftp.sra.ebi.ac.uk/vol1/fastq/SRR263/095/SRR26331595/SRR26331595_2.fastq.gz
+EXITRIF,SRR26331599,1,1,UNNAMED,1,ATGCATGC,https://ftp.sra.ebi.ac.uk/vol1/fastq/SRR263/099/SRR26331599/SRR26331599_1.fastq.gz,https://ftp.sra.ebi.ac.uk/vol1/fastq/SRR263/099/SRR26331599/SRR26331599_2.fastq.gz

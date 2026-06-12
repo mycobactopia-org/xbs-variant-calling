@@ -38,15 +38,26 @@ workflow XBS_VARIANT_CALLING {
     def ch_reference = channel.value([ [id: 'ref'], ref_fasta, ref_fai, ref_dict, bwa_index ])
 
     //
-    // Truth sets (required) + dbsnp (only if !skip_bqsr)
+    // Truth sets (required by VQSR; only enforced when the corresponding
+    // VQSR mode is enabled). dbsnp only required when !skip_bqsr.
     //
-    def snp_truth_vcf = file(params.snp_truth_vcf, checkIfExists: true)
-    def snp_truth_tbi = file(params.snp_truth_vcf_tbi ?: "${params.snp_truth_vcf}.tbi", checkIfExists: true)
-    def ch_snp_truth  = channel.value([ [id: 'snp_truth'], snp_truth_vcf, snp_truth_tbi ])
+    def ch_snp_truth
+    if (!params.skip_snp_vqsr) {
+        def snp_truth_vcf = file(params.snp_truth_vcf, checkIfExists: true)
+        def snp_truth_tbi = file(params.snp_truth_vcf_tbi ?: "${params.snp_truth_vcf}.tbi", checkIfExists: true)
+        ch_snp_truth = channel.value([ [id: 'snp_truth'], snp_truth_vcf, snp_truth_tbi ])
+    } else {
+        ch_snp_truth = channel.value([ [id: 'snp_truth'], [], [] ])
+    }
 
-    def indel_truth_vcf = file(params.indel_truth_vcf, checkIfExists: true)
-    def indel_truth_tbi = file(params.indel_truth_vcf_tbi ?: "${params.indel_truth_vcf}.tbi", checkIfExists: true)
-    def ch_indel_truth  = channel.value([ [id: 'indel_truth'], indel_truth_vcf, indel_truth_tbi ])
+    def ch_indel_truth
+    if (!params.skip_indel_vqsr) {
+        def indel_truth_vcf = file(params.indel_truth_vcf, checkIfExists: true)
+        def indel_truth_tbi = file(params.indel_truth_vcf_tbi ?: "${params.indel_truth_vcf}.tbi", checkIfExists: true)
+        ch_indel_truth = channel.value([ [id: 'indel_truth'], indel_truth_vcf, indel_truth_tbi ])
+    } else {
+        ch_indel_truth = channel.value([ [id: 'indel_truth'], [], [] ])
+    }
 
     def ch_dbsnp
     if (!params.skip_bqsr) {
