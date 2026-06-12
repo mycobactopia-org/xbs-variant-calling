@@ -13,7 +13,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { XBS-VARIANT-CALLING  } from './workflows/xbs-variant-calling'
+include { XBS_VARIANT_CALLING  } from './workflows/xbs-variant-calling'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_xbs-variant-calling_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_xbs-variant-calling_pipeline'
 /*
@@ -25,7 +25,7 @@ include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_xbs-
 //
 // WORKFLOW: Run main analysis pipeline depending on type of input
 //
-workflow MYCOBACTOPIAORG_XBS-VARIANT-CALLING {
+workflow MYCOBACTOPIAORG_XBS_VARIANT_CALLING {
 
     take:
     samplesheet // channel: samplesheet read in from --input
@@ -35,7 +35,7 @@ workflow MYCOBACTOPIAORG_XBS-VARIANT-CALLING {
     //
     // WORKFLOW: Run pipeline
     //
-    XBS-VARIANT-CALLING (
+    XBS_VARIANT_CALLING (
         samplesheet,
         params.outdir,
     )
@@ -67,7 +67,7 @@ workflow {
     //
     // WORKFLOW: Run main workflow
     //
-    MYCOBACTOPIAORG_XBS-VARIANT-CALLING (
+    MYCOBACTOPIAORG_XBS_VARIANT_CALLING (
         PIPELINE_INITIALISATION.out.samplesheet
     )
     //

@@ -13,7 +13,7 @@ include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_xbs-
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-workflow XBS-VARIANT-CALLING {
+workflow XBS_VARIANT_CALLING {
 
     take:
     ch_samplesheet // channel: samplesheet read in from --input
