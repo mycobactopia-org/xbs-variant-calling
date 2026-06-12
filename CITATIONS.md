@@ -10,9 +10,9 @@
 
 ## XBS pipeline (this re-implementation faithfully reproduces these methods)
 
-- [XBS variant calling pipeline (Goig et al. 2022)](https://pmc.ncbi.nlm.nih.gov/articles/PMC8743552/)
+- [XBS variant calling pipeline (Heupink et al. 2021)](https://pmc.ncbi.nlm.nih.gov/articles/PMC8743552/)
 
-  > Goig GA, Cancino-Muñoz I, Torres-Puente M, Villamayor LM, Borrás-Máñez M, Bosque M, Camañas JJ, Cerezales M, Domínguez J, Eiros JM, Fariñas-Salas P, García-Pachón E, González-Moreno J, Gracia-Ahufinger I, Iglesias L, Martínez-Pino LP, Martínez-Lirola M, Muñoz-Cuevas C, Navarro Y, Penedo A, Roa-Cruz A, Rodríguez-Granjer J, Ruiz-Serrano MJ, Sánchez-Padilla E, Sanz-Pérez A, Trujillo G, Valledor S, Viñuela L, Comas I. Comprehensive and accurate genetic variant identification from contaminated and low-coverage *Mycobacterium tuberculosis* whole genome sequencing data. *Microbial Genomics.* 2022 Apr;8(4):000689. doi: 10.1099/mgen.0.000689. PubMed PMID: 35384832; PMCID: PMC8743552.
+  > Heupink TH, Verboven L, Warren RM, Van Rie A. Comprehensive and accurate genetic variant identification from contaminated and low-coverage *Mycobacterium tuberculosis* whole genome sequencing data. *Microb Genom.* 2021 Nov 18;7(11):000689. doi: 10.1099/mgen.0.000689. PubMed PMID: 34793294; PMCID: PMC8743552.
 
 - [TORCH-Consortium/XBS-variant-calling-core](https://github.com/TORCH-Consortium/XBS-variant-calling-core) — canonical bash reference implementation that this pipeline ports to Nextflow.
 

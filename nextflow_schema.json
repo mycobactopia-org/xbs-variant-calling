@@ -2,7 +2,7 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/mycobactopia-org/xbs-variant-calling/master/nextflow_schema.json",
     "title": "mycobactopia-org/xbs-variant-calling pipeline parameters",
-    "description": "compleX Bacterial Sample variant caller — Nextflow port of the XBS pipeline (Goig 2021) as a generic-bacterial reusable variant-calling subworkflow.",
+    "description": "compleX Bacterial Sample variant caller — Nextflow port of the XBS pipeline (Heupink 2021) as a generic-bacterial reusable variant-calling subworkflow.",
     "type": "object",
     "$defs": {
         "input_output_options": {

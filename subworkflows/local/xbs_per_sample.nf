@@ -2,7 +2,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     XBS_PER_SAMPLE
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Per-sample portion of the XBS spine (Goig 2022). Maps each library,
+    Per-sample portion of the XBS spine (Heupink 2021). Maps each library,
     merges libraries within a sample, marks duplicates, optionally runs
     BQSR (skipped by default — paper-true), runs HaplotypeCaller in GVCF
     mode, and emits per-sample QC stats.

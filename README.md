@@ -11,7 +11,7 @@
 
 ## Introduction
 
-**mycobactopia-org/xbs-variant-calling** is a Nextflow re-implementation of the **XBS** (com**pleX** **B**acterial **S**ample) variant-calling pipeline described in [Goig et al. 2022](https://pmc.ncbi.nlm.nih.gov/articles/PMC8743552/), faithful to the canonical bash implementation at [TORCH-Consortium/XBS-variant-calling-core](https://github.com/TORCH-Consortium/XBS-variant-calling-core), packaged as a reusable nf-core-style subworkflow for **any haploid bacterium**.
+**mycobactopia-org/xbs-variant-calling** is a Nextflow re-implementation of the **XBS** (com**pleX** **B**acterial **S**ample) variant-calling pipeline described in [Heupink et al. 2021](https://pmc.ncbi.nlm.nih.gov/articles/PMC8743552/), faithful to the canonical bash implementation at [TORCH-Consortium/XBS-variant-calling-core](https://github.com/TORCH-Consortium/XBS-variant-calling-core), packaged as a reusable nf-core-style subworkflow for **any haploid bacterium**.
 
 Given paired-end short reads, a reference genome, and SNP + INDEL truth-set VCFs, it produces:
 
@@ -21,7 +21,7 @@ Given paired-end short reads, a reference genome, and SNP + INDEL truth-set VCFs
 - filtered SNP and INDEL VCFs (GATK VQSR, separate SNP + INDEL models)
 - VQSR diagnostics (tranches, recal tables, R plots)
 
-The pipeline was designed for **low-coverage** and **contaminated** sequencing data — Goig 2022 reports unaffected performance at 5–10× depth and across contamination levels up to >99.99%, where standard hard-filtering pipelines lose sensitivity. The combination of joint calling + VQSR is what enables this.
+The pipeline was designed for **low-coverage** and **contaminated** sequencing data — Heupink et al. 2021 report unaffected performance at 5–10× depth and across contamination levels up to >99.99%, where standard hard-filtering pipelines lose sensitivity. The combination of joint calling + VQSR is what enables this.
 
 ### Pipeline stages
 
@@ -29,7 +29,7 @@ The pipeline was designed for **low-coverage** and **contaminated** sequencing d
 2. **Sort + index** — samtools
 3. **Library merge** — samtools merge (when a sample has multiple libraries)
 4. **Mark duplicates** — GATK MarkDuplicates
-5. **(Optional) BQSR** — GATK BaseRecalibrator + ApplyBQSR. **Skipped by default** — Goig 2022 explicitly omits this to avoid contaminant DNA variants being interpreted as systematic errors.
+5. **(Optional) BQSR** — GATK BaseRecalibrator + ApplyBQSR. **Skipped by default** — Heupink et al. 2021 explicitly omit this to avoid contaminant DNA variants being interpreted as systematic errors.
 6. **Per-sample QC** — samtools stats, GATK CollectWgsMetrics, GATK FlagStat (emitted only; no gating)
 7. **Per-sample HaplotypeCaller** — `-ploidy 1 -ERC GVCF -G StandardAnnotation -G AS_StandardAnnotation --read-filter MappingQualityNotZeroReadFilter`
 8. **Cohort CombineGVCFs**
@@ -90,7 +90,7 @@ nextflow run mycobactopia-org/xbs-variant-calling \
 
 mycobactopia-org/xbs-variant-calling was developed by Abhinav Sharma.
 
-The XBS pipeline this implementation is based on was developed by Tim H.H. Coorens and collaborators in the lab of Lennard Epping at the Bavarian Health and Food Safety Authority — see [Goig et al., 2022](https://pmc.ncbi.nlm.nih.gov/articles/PMC8743552/) and the original bash scripts at [TORCH-Consortium/XBS-variant-calling-core](https://github.com/TORCH-Consortium/XBS-variant-calling-core).
+The XBS pipeline this implementation is based on was developed by Tim H. Heupink, Lennert Verboven, Robin M. Warren, and Annelies Van Rie — see [Heupink et al., 2021](https://pmc.ncbi.nlm.nih.gov/articles/PMC8743552/) and the original bash scripts at [TORCH-Consortium/XBS-variant-calling-core](https://github.com/TORCH-Consortium/XBS-variant-calling-core).
 
 ## Contributions and Support
 
@@ -98,7 +98,7 @@ If you would like to contribute, please see the [contributing guidelines](docs/C
 
 ## Citations
 
-If you use this pipeline, please cite **Goig et al. 2022** ([PMC8743552](https://pmc.ncbi.nlm.nih.gov/articles/PMC8743552/)) for the XBS methodology, and consult [`CITATIONS.md`](CITATIONS.md) for full citations of every tool the pipeline uses.
+If you use this pipeline, please cite **Heupink et al. 2021** ([PMC8743552](https://pmc.ncbi.nlm.nih.gov/articles/PMC8743552/)) for the XBS methodology, and consult [`CITATIONS.md`](CITATIONS.md) for full citations of every tool the pipeline uses.
 
 This pipeline reuses scaffolding from the [nf-core](https://nf-co.re) community framework under the [MIT license](https://github.com/nf-core/tools/blob/main/LICENSE):
 

@@ -2,7 +2,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     XBS_COHORT_VQSR
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Cohort-level joint calling + VQSR — the core Goig 2022 step that
+    Cohort-level joint calling + VQSR — the core Heupink 2021 step that
     enables low-coverage / contaminated-sample variant calling at scale.
 
     Stages 8–12 from the canonical XBS-core bash:
