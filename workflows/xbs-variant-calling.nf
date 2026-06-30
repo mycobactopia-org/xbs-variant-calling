@@ -38,11 +38,11 @@ workflow XBS_VARIANT_CALLING {
     def ch_reference = channel.value([ [id: 'ref'], ref_fasta, ref_fai, ref_dict, bwa_index ])
 
     //
-    // Truth sets (required by VQSR; only enforced when the corresponding
-    // VQSR mode is enabled). dbsnp only required when !skip_bqsr.
+    // Truth sets — required only when the corresponding filter_mode == 'vqsr'.
+    // dbsnp_vcf required only when !skip_bqsr.
     //
     def ch_snp_truth
-    if (!params.skip_snp_vqsr) {
+    if (params.snp_filter_mode == 'vqsr') {
         def snp_truth_vcf = file(params.snp_truth_vcf, checkIfExists: true)
         def snp_truth_tbi = file(params.snp_truth_vcf_tbi ?: "${params.snp_truth_vcf}.tbi", checkIfExists: true)
         ch_snp_truth = channel.value([ [id: 'snp_truth'], snp_truth_vcf, snp_truth_tbi ])
@@ -51,7 +51,7 @@ workflow XBS_VARIANT_CALLING {
     }
 
     def ch_indel_truth
-    if (!params.skip_indel_vqsr) {
+    if (params.indel_filter_mode == 'vqsr') {
         def indel_truth_vcf = file(params.indel_truth_vcf, checkIfExists: true)
         def indel_truth_tbi = file(params.indel_truth_vcf_tbi ?: "${params.indel_truth_vcf}.tbi", checkIfExists: true)
         ch_indel_truth = channel.value([ [id: 'indel_truth'], indel_truth_vcf, indel_truth_tbi ])

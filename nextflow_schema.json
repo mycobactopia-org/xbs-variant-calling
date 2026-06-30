@@ -140,11 +140,179 @@
                     "description": "Display hidden parameters in the help message (only works when --help or --help_full are provided)."
                 }
             }
+        },
+        "reference_bundle_options": {
+            "title": "Reference bundle (organism-agnostic via config)",
+            "type": "object",
+            "fa_icon": "fas fa-dna",
+            "description": "The reference FASTA must be co-located with its .fai, .dict, and BWA index files (.amb, .ann, .bwt, .pac, .sa).",
+            "properties": {
+                "reference_dir": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "Directory containing the reference FASTA + index files."
+                },
+                "reference_basename": {
+                    "type": "string",
+                    "description": "Basename of the reference (without .fa extension), e.g. 'NC-000962-3-H37Rv' for MTB."
+                }
+            }
+        },
+        "variant_filtering_options": {
+            "title": "Variant filtering",
+            "type": "object",
+            "fa_icon": "fas fa-filter",
+            "description": "Per-mode tri-state contract: replaces the historical skip_*_vqsr booleans with explicit selection between VQSR, GATK hard filters, and no filtering.",
+            "properties": {
+                "snp_filter_mode": {
+                    "type": "string",
+                    "default": "vqsr",
+                    "enum": ["vqsr", "hard_filters", "none"],
+                    "description": "How to filter SNPs after SelectVariants split. 'vqsr' = Heupink 2021 (needs truth set). 'hard_filters' = GATK VariantFiltration with snp_hard_filter_expression. 'none' = pass-through."
+                },
+                "indel_filter_mode": {
+                    "type": "string",
+                    "default": "vqsr",
+                    "enum": ["vqsr", "hard_filters", "none"],
+                    "description": "How to filter INDELs. Same modes as snp_filter_mode. MAGMA historically uses 'hard_filters' for INDELs."
+                },
+                "snp_truth_vcf": {
+                    "type": "string",
+                    "format": "file-path",
+                    "description": "SNP truth VCF for VQSR (required when snp_filter_mode='vqsr'). E.g. Coll2018 for MTB."
+                },
+                "snp_truth_vcf_tbi": {
+                    "type": "string",
+                    "format": "file-path",
+                    "description": "Tabix index for snp_truth_vcf. Defaults to ${snp_truth_vcf}.tbi if unset."
+                },
+                "indel_truth_vcf": {
+                    "type": "string",
+                    "format": "file-path",
+                    "description": "INDEL truth VCF for VQSR (required when indel_filter_mode='vqsr')."
+                },
+                "indel_truth_vcf_tbi": {
+                    "type": "string",
+                    "format": "file-path",
+                    "description": "Tabix index for indel_truth_vcf."
+                },
+                "vqsr_max_gaussians_snp": {
+                    "type": "integer",
+                    "default": 4,
+                    "description": "Max Gaussians for SNP VQSR. Heupink 2021 used 4 (12+ samples). Knock down to 1–2 for small cohorts."
+                },
+                "vqsr_max_gaussians_indel": {
+                    "type": "integer",
+                    "default": 2,
+                    "description": "Max Gaussians for INDEL VQSR. Knock down to 1 for small cohorts."
+                },
+                "snp_hard_filter_expression": {
+                    "type": "string",
+                    "default": "QD < 2.0 || FS > 60.0 || MQ < 40.0 || MQRankSum < -12.5 || ReadPosRankSum < -8.0 || SOR > 3.0",
+                    "description": "GATK VariantFiltration expression for SNPs (when snp_filter_mode='hard_filters')."
+                },
+                "snp_hard_filter_name": {
+                    "type": "string",
+                    "default": "snp_hard_filter",
+                    "description": "FILTER name applied to failing SNP records."
+                },
+                "indel_hard_filter_expression": {
+                    "type": "string",
+                    "default": "QD < 2.0 || FS > 200.0 || ReadPosRankSum < -20.0 || SOR > 10.0",
+                    "description": "GATK VariantFiltration expression for INDELs."
+                },
+                "indel_hard_filter_name": {
+                    "type": "string",
+                    "default": "indel_hard_filter",
+                    "description": "FILTER name applied to failing INDEL records."
+                }
+            }
+        },
+        "bqsr_options": {
+            "title": "BQSR (opt-in)",
+            "type": "object",
+            "fa_icon": "fas fa-sliders-h",
+            "description": "Base Quality Score Recalibration. Heupink 2021 explicitly omits this — paper-true default is skip_bqsr=true.",
+            "properties": {
+                "skip_bqsr": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Skip BQSR. Default true (paper-true). Set false to enable BQSR (requires dbsnp_vcf)."
+                },
+                "dbsnp_vcf": {
+                    "type": "string",
+                    "format": "file-path",
+                    "description": "Known-sites VCF for BaseRecalibrator. Required when skip_bqsr=false."
+                },
+                "dbsnp_vcf_tbi": {
+                    "type": "string",
+                    "format": "file-path",
+                    "description": "Tabix index for dbsnp_vcf."
+                }
+            }
+        },
+        "cohort_options": {
+            "title": "Cohort joint-genotyping toggle",
+            "type": "object",
+            "fa_icon": "fas fa-layer-group",
+            "properties": {
+                "skip_cohort": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "When true, run only XBS_PER_SAMPLE (per-sample mapping → HC GVCF) and skip the cohort stages. Useful for incremental cohorts or consumers that want only per-sample GVCFs."
+                },
+                "joint_name": {
+                    "type": "string",
+                    "default": "joint",
+                    "description": "Basename for cohort-level VCFs."
+                }
+            }
+        },
+        "organism_options": {
+            "title": "Organism-specific knobs",
+            "type": "object",
+            "fa_icon": "fas fa-bacterium",
+            "properties": {
+                "sample_ploidy": {
+                    "type": "integer",
+                    "default": 1,
+                    "description": "Sample ploidy. 1 for bacteria; 2 is not supported by XBS."
+                },
+                "target_titv": {
+                    "type": "number",
+                    "description": "Target Ti/Tv ratio for VQSR (organism-specific). e.g. 1.85 for MTB. Null/unset → omit --target-titv."
+                },
+                "indel_lod_cutoff": {
+                    "type": "number",
+                    "default": 0.0,
+                    "description": "Heupink 2021 INDEL VQSLOD cutoff for ApplyVQSR."
+                },
+                "bwa_extra_args": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Extra args passed to BWA-MEM (consumer tuning hook, e.g. MAGMA's '-k 100')."
+                }
+            }
         }
     },
     "allOf": [
         {
             "$ref": "#/$defs/input_output_options"
+        },
+        {
+            "$ref": "#/$defs/reference_bundle_options"
+        },
+        {
+            "$ref": "#/$defs/variant_filtering_options"
+        },
+        {
+            "$ref": "#/$defs/bqsr_options"
+        },
+        {
+            "$ref": "#/$defs/cohort_options"
+        },
+        {
+            "$ref": "#/$defs/organism_options"
         },
         {
             "$ref": "#/$defs/institutional_config_options"
