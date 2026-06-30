@@ -189,6 +189,21 @@ require_flags 'GATK4_APPLYVQSR_INDEL' \
               '\-mode INDEL' \
               '\-\-exclude-filtered'
 
+# ---------------------------------------------------------------------
+# Hard-filter fallback (alternate path; not in XBS-core bash but
+# required for MAGMA parity — MAGMA filters INDELs with hard filters,
+# never VQSR). Check that the wired flags reference the configurable
+# expressions, so consumers can tune thresholds per organism.
+# ---------------------------------------------------------------------
+require_flags 'GATK4_VARIANTFILTRATION_SNP' \
+              '\-\-filter-expression' \
+              '\$\{params\.snp_hard_filter_expression\}' \
+              '\-\-filter-name'
+require_flags 'GATK4_VARIANTFILTRATION_INDEL' \
+              '\-\-filter-expression' \
+              '\$\{params\.indel_hard_filter_expression\}' \
+              '\-\-filter-name'
+
 echo
 echo "=== summary ==="
 printf "  passed: %d\n  failed: %d\n  skipped: %d\n\n" "$PASS" "$FAIL" "$SKIP"

@@ -23,6 +23,8 @@ include { GATK4_VARIANTRECALIBRATOR as GATK4_VARIANTRECALIBRATOR_SNP        } fr
 include { GATK4_VARIANTRECALIBRATOR as GATK4_VARIANTRECALIBRATOR_INDEL      } from '../../modules/nf-core/gatk4/variantrecalibrator/main'
 include { GATK4_APPLYVQSR as GATK4_APPLYVQSR_SNP                            } from '../../modules/nf-core/gatk4/applyvqsr/main'
 include { GATK4_APPLYVQSR as GATK4_APPLYVQSR_INDEL                          } from '../../modules/nf-core/gatk4/applyvqsr/main'
+include { GATK4_VARIANTFILTRATION as GATK4_VARIANTFILTRATION_SNP            } from '../../modules/nf-core/gatk4/variantfiltration/main'
+include { GATK4_VARIANTFILTRATION as GATK4_VARIANTFILTRATION_INDEL          } from '../../modules/nf-core/gatk4/variantfiltration/main'
 
 
 workflow XBS_COHORT {
@@ -93,14 +95,16 @@ workflow XBS_COHORT {
     GATK4_SELECTVARIANTS_INDEL(ch_sv_input)
 
     //
-    // STAGE 11: SNP VQSR (gated by params.skip_snp_vqsr)
+    // STAGE 11: SNP filtering — three modes (vqsr | hard_filters | none)
     //
-    def ch_snp_filtered    = channel.empty()
-    def ch_indel_filtered  = channel.empty()
+    def ch_snp_filtered     = channel.empty()
+    def ch_indel_filtered   = channel.empty()
     def ch_vqsr_diagnostics = channel.empty()
 
-    if (!params.skip_snp_vqsr) {
-        def ch_vr_snp_in = GATK4_SELECTVARIANTS_SNP.out.vcf.join(GATK4_SELECTVARIANTS_SNP.out.tbi)
+    def ch_sv_snp_out = GATK4_SELECTVARIANTS_SNP.out.vcf.join(GATK4_SELECTVARIANTS_SNP.out.tbi)
+
+    if (params.snp_filter_mode == 'vqsr') {
+        def ch_vr_snp_in = ch_sv_snp_out
         def labels_snp = ['--resource:5000SNP,known=false,training=true,truth=true,prior=20.0']
         GATK4_VARIANTRECALIBRATOR_SNP(
             ch_vr_snp_in,
@@ -109,8 +113,7 @@ workflow XBS_COHORT {
             ch_fasta_path, ch_fai_path, ch_dict_path
         )
 
-        def ch_apply_snp_in = GATK4_SELECTVARIANTS_SNP.out.vcf
-            .join(GATK4_SELECTVARIANTS_SNP.out.tbi)
+        def ch_apply_snp_in = ch_sv_snp_out
             .join(GATK4_VARIANTRECALIBRATOR_SNP.out.recal)
             .join(GATK4_VARIANTRECALIBRATOR_SNP.out.idx)
             .join(GATK4_VARIANTRECALIBRATOR_SNP.out.tranches)
@@ -120,16 +123,25 @@ workflow XBS_COHORT {
         ch_vqsr_diagnostics = ch_vqsr_diagnostics
             .mix(GATK4_VARIANTRECALIBRATOR_SNP.out.tranches)
             .mix(GATK4_VARIANTRECALIBRATOR_SNP.out.plots.ifEmpty([]))
+    } else if (params.snp_filter_mode == 'hard_filters') {
+        GATK4_VARIANTFILTRATION_SNP(
+            ch_sv_snp_out,
+            ch_fasta_tuple, ch_fai_tuple, ch_dict_tuple,
+            channel.value([[id:'none'], []])   // gzi unused for bgzipped (non-gzi) VCFs
+        )
+        ch_snp_filtered = GATK4_VARIANTFILTRATION_SNP.out.vcf.join(GATK4_VARIANTFILTRATION_SNP.out.tbi)
     } else {
-        // Without VQSR, emit the unfiltered split SNP VCF as the "filtered" stand-in
-        ch_snp_filtered = GATK4_SELECTVARIANTS_SNP.out.vcf.join(GATK4_SELECTVARIANTS_SNP.out.tbi)
+        // 'none' — pass-through unfiltered SelectVariants output
+        ch_snp_filtered = ch_sv_snp_out
     }
 
     //
-    // STAGE 12: INDEL VQSR (gated by params.skip_indel_vqsr)
+    // STAGE 12: INDEL filtering — three modes (vqsr | hard_filters | none)
     //
-    if (!params.skip_indel_vqsr) {
-        def ch_vr_indel_in = GATK4_SELECTVARIANTS_INDEL.out.vcf.join(GATK4_SELECTVARIANTS_INDEL.out.tbi)
+    def ch_sv_indel_out = GATK4_SELECTVARIANTS_INDEL.out.vcf.join(GATK4_SELECTVARIANTS_INDEL.out.tbi)
+
+    if (params.indel_filter_mode == 'vqsr') {
+        def ch_vr_indel_in = ch_sv_indel_out
         def labels_indel = ['--resource:500INDEL,known=false,training=true,truth=true,prior=20.0']
         GATK4_VARIANTRECALIBRATOR_INDEL(
             ch_vr_indel_in,
@@ -138,8 +150,7 @@ workflow XBS_COHORT {
             ch_fasta_path, ch_fai_path, ch_dict_path
         )
 
-        def ch_apply_indel_in = GATK4_SELECTVARIANTS_INDEL.out.vcf
-            .join(GATK4_SELECTVARIANTS_INDEL.out.tbi)
+        def ch_apply_indel_in = ch_sv_indel_out
             .join(GATK4_VARIANTRECALIBRATOR_INDEL.out.recal)
             .join(GATK4_VARIANTRECALIBRATOR_INDEL.out.idx)
             .join(GATK4_VARIANTRECALIBRATOR_INDEL.out.tranches)
@@ -149,13 +160,21 @@ workflow XBS_COHORT {
         ch_vqsr_diagnostics = ch_vqsr_diagnostics
             .mix(GATK4_VARIANTRECALIBRATOR_INDEL.out.tranches)
             .mix(GATK4_VARIANTRECALIBRATOR_INDEL.out.plots.ifEmpty([]))
+    } else if (params.indel_filter_mode == 'hard_filters') {
+        GATK4_VARIANTFILTRATION_INDEL(
+            ch_sv_indel_out,
+            ch_fasta_tuple, ch_fai_tuple, ch_dict_tuple,
+            channel.value([[id:'none'], []])
+        )
+        ch_indel_filtered = GATK4_VARIANTFILTRATION_INDEL.out.vcf.join(GATK4_VARIANTFILTRATION_INDEL.out.tbi)
     } else {
-        ch_indel_filtered = GATK4_SELECTVARIANTS_INDEL.out.vcf.join(GATK4_SELECTVARIANTS_INDEL.out.tbi)
+        // 'none' — pass-through
+        ch_indel_filtered = ch_sv_indel_out
     }
 
     emit:
-    raw_variants     = ch_raw_variants    // [ meta, raw_variants.vcf.gz, tbi ]
-    snp_filtered     = ch_snp_filtered    // [ meta, FilteredSNPs.vcf.gz, tbi ]   (or raw SNPs if skip_snp_vqsr)
-    indel_filtered   = ch_indel_filtered  // [ meta, FilteredINDELs.vcf.gz, tbi ] (or raw INDELs if skip_indel_vqsr)
-    vqsr_diagnostics = ch_vqsr_diagnostics
+    raw_variants     = ch_raw_variants     // [ meta, raw_variants.vcf.gz, tbi ]
+    snp_filtered     = ch_snp_filtered     // [ meta, vcf, tbi ] — content depends on snp_filter_mode
+    indel_filtered   = ch_indel_filtered   // [ meta, vcf, tbi ] — content depends on indel_filter_mode
+    vqsr_diagnostics = ch_vqsr_diagnostics // mixed; empty unless any *_filter_mode == 'vqsr'
 }
