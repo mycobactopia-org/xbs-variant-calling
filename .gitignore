@@ -8,3 +8,6 @@ testing*
 *.pyc
 null/
 .lineage/
+
+# Ulysses iPad working copy (manuscript scaffold; scratch)
+ulysses-xbs/

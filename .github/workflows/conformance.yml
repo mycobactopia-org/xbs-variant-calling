@@ -1,0 +1,32 @@
+name: XBS-core conformance
+
+on:
+  push:
+    branches:
+      - master
+      - dev
+    paths:
+      - 'conf/modules.config'
+      - 'tests/conformance/**'
+      - '.github/workflows/conformance.yml'
+  pull_request:
+    paths:
+      - 'conf/modules.config'
+      - 'tests/conformance/**'
+      - '.github/workflows/conformance.yml'
+
+# Cancel in-progress runs when a new commit is pushed
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  conformance:
+    name: Heupink 2021 ext.args parity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run XBS-core conformance check
+        run: |
+          bash tests/conformance/compare_command_sh.sh
