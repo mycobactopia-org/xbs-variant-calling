@@ -29,6 +29,7 @@ include { SAMTOOLS_STATS                                       } from '../../mod
 include { SAMTOOLS_FLAGSTAT                                    } from '../../modules/nf-core/samtools/flagstat/main'
 include { PICARD_COLLECTWGSMETRICS                             } from '../../modules/nf-core/picard/collectwgsmetrics/main'
 include { GATK4_HAPLOTYPECALLER                                } from '../../modules/nf-core/gatk4/haplotypecaller/main'
+include { GATK4SPARK_HAPLOTYPECALLER                           } from '../../modules/local/gatk4spark/haplotypecaller/main'
 
 
 workflow XBS_PER_SAMPLE {
@@ -129,17 +130,39 @@ workflow XBS_PER_SAMPLE {
     //
     // STAGE 7: HaplotypeCaller (per-sample GVCF, ploidy=1 via ext.args)
     //
+    // Two interchangeable backends, identical emit shape:
+    //   - GATK4_HAPLOTYPECALLER       (default; non-Spark; nf-core)
+    //   - GATK4SPARK_HAPLOTYPECALLER  (opt-in via !params.skip_gatk4_haplotypecaller_spark)
+    // Both produce {vcf, tbi, vcf_tbi, versions} so the downstream emits are agnostic.
     def ch_hc_input = ch_bam_bai.map { meta, bam, bai -> [meta, bam, bai, [], []] }   // empty intervals + dragstr_model
-    GATK4_HAPLOTYPECALLER(
-        ch_hc_input,
-        ch_fasta_tuple, ch_fai_tuple, ch_dict_tuple,
-        channel.value([[id:'none'], []]),   // dbsnp not used in HC (BQSR-only)
-        channel.value([[id:'none'], []])
-    )
+    def ch_hc_vcf
+    def ch_hc_tbi
+    def ch_hc_versions
+    if (params.skip_gatk4_haplotypecaller_spark) {
+        GATK4_HAPLOTYPECALLER(
+            ch_hc_input,
+            ch_fasta_tuple, ch_fai_tuple, ch_dict_tuple,
+            channel.value([[id:'none'], []]),   // dbsnp not used in HC (BQSR-only)
+            channel.value([[id:'none'], []])
+        )
+        ch_hc_vcf      = GATK4_HAPLOTYPECALLER.out.vcf
+        ch_hc_tbi      = GATK4_HAPLOTYPECALLER.out.tbi
+        ch_hc_versions = GATK4_HAPLOTYPECALLER.out.versions
+    } else {
+        GATK4SPARK_HAPLOTYPECALLER(
+            ch_hc_input,
+            ch_fasta_tuple, ch_fai_tuple, ch_dict_tuple,
+            channel.value([[id:'none'], []]),
+            channel.value([[id:'none'], []])
+        )
+        ch_hc_vcf      = GATK4SPARK_HAPLOTYPECALLER.out.vcf
+        ch_hc_tbi      = GATK4SPARK_HAPLOTYPECALLER.out.tbi
+        ch_hc_versions = GATK4SPARK_HAPLOTYPECALLER.out.versions
+    }
 
     emit:
-    gvcf_vcf        = GATK4_HAPLOTYPECALLER.out.vcf       // [ meta, *.g.vcf.gz ]
-    gvcf_tbi        = GATK4_HAPLOTYPECALLER.out.tbi       // [ meta, *.g.vcf.gz.tbi ]
+    gvcf_vcf        = ch_hc_vcf                            // [ meta, *.g.vcf.gz ]
+    gvcf_tbi        = ch_hc_tbi                            // [ meta, *.g.vcf.gz.tbi ]
     sample_bam      = ch_bam_bai                          // [ meta, bam, bai ]
     samtools_stats  = SAMTOOLS_STATS.out.stats            // [ meta, *.stats ]
     flagstat        = SAMTOOLS_FLAGSTAT.out.flagstat      // [ meta, *.flagstat ]
