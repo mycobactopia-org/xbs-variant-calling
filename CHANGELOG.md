@@ -3,7 +3,21 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v0.3.0dev - unreleased
+## v0.4.0dev - unreleased
+
+GATK optimisations — Pattern 1 from the GATK-optimisations spec ([`abc-universe/specs/active/xbs-variant-calling-gatk-optimizations.md`](../../abc-universe/specs/active/xbs-variant-calling-gatk-optimizations.md)).
+
+### `Added`
+
+- **Optional `HaplotypeCallerSpark` backend** (param `skip_gatk4_haplotypecaller_spark`, default `true`). When `false`, the per-sample stage routes BAMs through a new local module `GATK4SPARK_HAPLOTYPECALLER` that runs `gatk HaplotypeCallerSpark --spark-master local[$task.cpus]` for per-sample parallelism. The Spark and non-Spark modules emit identical `{vcf, tbi, vcf_tbi, versions}` channels so every downstream stage is agnostic. Default `true` keeps the per-sample output byte-equivalent to `v0.3.0` for any current invocation.
+- New local module `modules/local/gatk4spark/haplotypecaller/main.nf` (container `quay.io/biocontainers/gatk4:4.6.0.0--py310hdfd78af_0` / singularity equivalent — same GATK4 build that nf-core's non-Spark module uses).
+
+### `Pending`
+
+- Pattern 2 — GenomicsDB joint genotyping (per-chromosome scatter) — separate PR.
+- Pattern 3 — gVCF checkpoints with `zstd` / `genozip` codecs — separate PRs.
+
+## v0.3.0 — released 2026-06-30
 
 Stable interface contract for consumption by MAGMA and mtbc-varcaller-nf.
 

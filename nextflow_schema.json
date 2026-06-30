@@ -261,6 +261,11 @@
                     "default": false,
                     "description": "When true, run only XBS_PER_SAMPLE (per-sample mapping → HC GVCF) and skip the cohort stages. Useful for incremental cohorts or consumers that want only per-sample GVCFs."
                 },
+                "skip_gatk4_haplotypecaller_spark": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "HaplotypeCaller backend. true (default) → nf-core GATK4_HAPLOTYPECALLER (non-Spark, stable). false → local GATK4SPARK_HAPLOTYPECALLER with --spark-master local[$task.cpus] (per-sample parallelism). Both backends emit identical channels so downstream stages are agnostic."
+                },
                 "joint_name": {
                     "type": "string",
                     "default": "joint",
