@@ -9,8 +9,12 @@ GATK optimisations — Pattern 1 from the GATK-optimisations spec ([`abc-univers
 
 ### `Added`
 
-- **Optional `HaplotypeCallerSpark` backend** (param `skip_gatk4_haplotypecaller_spark`, default `true`). When `false`, the per-sample stage routes BAMs through a new local module `GATK4SPARK_HAPLOTYPECALLER` that runs `gatk HaplotypeCallerSpark --spark-master local[$task.cpus]` for per-sample parallelism. The Spark and non-Spark modules emit identical `{vcf, tbi, vcf_tbi, versions}` channels so every downstream stage is agnostic. Default `true` keeps the per-sample output byte-equivalent to `v0.3.0` for any current invocation.
+- **Optional `HaplotypeCallerSpark` backend** (param `use_spark_haplotypecaller`, default `false`). When `true`, the per-sample stage routes BAMs through a new local module `GATK4SPARK_HAPLOTYPECALLER` that runs `gatk HaplotypeCallerSpark --spark-master local[$task.cpus]` for per-sample parallelism. The Spark and non-Spark modules emit identical `{vcf, tbi, vcf_tbi, versions}` channels so every downstream stage is agnostic. Default `false` keeps the per-sample output byte-equivalent to `v0.3.0` for any current invocation.
 - New local module `modules/local/gatk4spark/haplotypecaller/main.nf` (container `quay.io/biocontainers/gatk4:4.6.0.0--py310hdfd78af_0` / singularity equivalent — same GATK4 build that nf-core's non-Spark module uses).
+
+### `Changed`
+
+- **Renamed HaplotypeCaller-backend param** `skip_gatk4_haplotypecaller_spark` → `use_spark_haplotypecaller` (still `v0.4.0dev`; nothing has been released yet). Same semantics inverted: the flag now names what it enables rather than what it skips. Rationale: some Nextflow launchers (notably `abc-cluster-cli`) serialise `--param x=false` as the string `"false"`, which is truthy in Groovy. Double-negatives like `skip_x=false` become unreliable across launchers; `use_x=true` avoids that entire class of surprise.
 
 ### `Pending`
 
