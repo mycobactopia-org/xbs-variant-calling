@@ -132,23 +132,13 @@ workflow XBS_PER_SAMPLE {
     //
     // Two interchangeable backends, identical emit shape:
     //   - GATK4_HAPLOTYPECALLER       (default; non-Spark; nf-core)
-    //   - GATK4SPARK_HAPLOTYPECALLER  (opt-in via !params.skip_gatk4_haplotypecaller_spark)
+    //   - GATK4SPARK_HAPLOTYPECALLER  (opt-in via params.use_spark_haplotypecaller)
     // Both produce {vcf, tbi, vcf_tbi, versions} so the downstream emits are agnostic.
     def ch_hc_input = ch_bam_bai.map { meta, bam, bai -> [meta, bam, bai, [], []] }   // empty intervals + dragstr_model
     def ch_hc_vcf
     def ch_hc_tbi
     def ch_hc_versions
-    if (params.skip_gatk4_haplotypecaller_spark) {
-        GATK4_HAPLOTYPECALLER(
-            ch_hc_input,
-            ch_fasta_tuple, ch_fai_tuple, ch_dict_tuple,
-            channel.value([[id:'none'], []]),   // dbsnp not used in HC (BQSR-only)
-            channel.value([[id:'none'], []])
-        )
-        ch_hc_vcf      = GATK4_HAPLOTYPECALLER.out.vcf
-        ch_hc_tbi      = GATK4_HAPLOTYPECALLER.out.tbi
-        ch_hc_versions = GATK4_HAPLOTYPECALLER.out.versions
-    } else {
+    if (params.use_spark_haplotypecaller) {
         GATK4SPARK_HAPLOTYPECALLER(
             ch_hc_input,
             ch_fasta_tuple, ch_fai_tuple, ch_dict_tuple,
@@ -158,6 +148,16 @@ workflow XBS_PER_SAMPLE {
         ch_hc_vcf      = GATK4SPARK_HAPLOTYPECALLER.out.vcf
         ch_hc_tbi      = GATK4SPARK_HAPLOTYPECALLER.out.tbi
         ch_hc_versions = GATK4SPARK_HAPLOTYPECALLER.out.versions
+    } else {
+        GATK4_HAPLOTYPECALLER(
+            ch_hc_input,
+            ch_fasta_tuple, ch_fai_tuple, ch_dict_tuple,
+            channel.value([[id:'none'], []]),   // dbsnp not used in HC (BQSR-only)
+            channel.value([[id:'none'], []])
+        )
+        ch_hc_vcf      = GATK4_HAPLOTYPECALLER.out.vcf
+        ch_hc_tbi      = GATK4_HAPLOTYPECALLER.out.tbi
+        ch_hc_versions = GATK4_HAPLOTYPECALLER.out.versions
     }
 
     emit:
