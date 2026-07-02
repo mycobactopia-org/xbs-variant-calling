@@ -25,7 +25,7 @@ include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_xbs-
 //
 // WORKFLOW: Run main analysis pipeline depending on type of input
 //
-workflow MYCOBACTOPIAORG_XBS_VARIANT_CALLING {
+workflow MYCOBACTOPIA {
 
     take:
     samplesheet // channel: samplesheet read in from --input
@@ -67,7 +67,7 @@ workflow {
     //
     // WORKFLOW: Run main workflow
     //
-    MYCOBACTOPIAORG_XBS_VARIANT_CALLING (
+    MYCOBACTOPIA (
         PIPELINE_INITIALISATION.out.samplesheet
     )
     //
