@@ -130,14 +130,17 @@ workflow XBS_PER_SAMPLE {
     //
     // STAGE 7: HaplotypeCaller (per-sample GVCF, ploidy=1 via ext.args)
     //
-    // Two interchangeable backends, identical emit shape:
+    // Two interchangeable backends, identical vcf/tbi emit shape:
     //   - GATK4_HAPLOTYPECALLER       (default; non-Spark; nf-core)
     //   - GATK4SPARK_HAPLOTYPECALLER  (opt-in via params.use_spark_haplotypecaller)
-    // Both produce {vcf, tbi, vcf_tbi, versions} so the downstream emits are agnostic.
+    //
+    // Versions are collected via nf-core's topic-based `versions` channel — no
+    // per-branch versions capture is needed here (nf-core's GATK4_HAPLOTYPECALLER
+    // does not emit a `.out.versions` sub-channel; it publishes to `topic: versions`
+    // as `versions_gatk4`, which the top-level workflow harvests separately).
     def ch_hc_input = ch_bam_bai.map { meta, bam, bai -> [meta, bam, bai, [], []] }   // empty intervals + dragstr_model
     def ch_hc_vcf
     def ch_hc_tbi
-    def ch_hc_versions
     if (params.use_spark_haplotypecaller) {
         GATK4SPARK_HAPLOTYPECALLER(
             ch_hc_input,
@@ -145,9 +148,8 @@ workflow XBS_PER_SAMPLE {
             channel.value([[id:'none'], []]),
             channel.value([[id:'none'], []])
         )
-        ch_hc_vcf      = GATK4SPARK_HAPLOTYPECALLER.out.vcf
-        ch_hc_tbi      = GATK4SPARK_HAPLOTYPECALLER.out.tbi
-        ch_hc_versions = GATK4SPARK_HAPLOTYPECALLER.out.versions
+        ch_hc_vcf = GATK4SPARK_HAPLOTYPECALLER.out.vcf
+        ch_hc_tbi = GATK4SPARK_HAPLOTYPECALLER.out.tbi
     } else {
         GATK4_HAPLOTYPECALLER(
             ch_hc_input,
@@ -155,9 +157,8 @@ workflow XBS_PER_SAMPLE {
             channel.value([[id:'none'], []]),   // dbsnp not used in HC (BQSR-only)
             channel.value([[id:'none'], []])
         )
-        ch_hc_vcf      = GATK4_HAPLOTYPECALLER.out.vcf
-        ch_hc_tbi      = GATK4_HAPLOTYPECALLER.out.tbi
-        ch_hc_versions = GATK4_HAPLOTYPECALLER.out.versions
+        ch_hc_vcf = GATK4_HAPLOTYPECALLER.out.vcf
+        ch_hc_tbi = GATK4_HAPLOTYPECALLER.out.tbi
     }
 
     emit:
