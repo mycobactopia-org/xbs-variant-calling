@@ -88,10 +88,23 @@ workflow PIPELINE_INITIALISATION {
         .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input.json"))
         .map {
             meta, fastq_1, fastq_2 ->
+                // The schema declares study/sample/library as meta fields
+                // but does NOT set meta.id. Compose meta.id as
+                // "<study>.<sample>.<library>" so groupTuple(by:meta.id) keys
+                // per-library. Without this, meta.id is null for every row
+                // and the groupTuple below collapses all libraries into a
+                // single bucket, so BWA_MEM gets handed every sample's FASTQs
+                // in one invocation and fails with a bwa usage help ("6 fastq
+                // args to a 2-arg tool"). Matches the process tag used
+                // downstream (xbs_per_sample.nf:74 promotes meta.id →
+                // meta.sample when it needs a sample-level grouping key
+                // for library merging).
+                def id = meta.id ?: "${meta.study}.${meta.sample}.${meta.library}".toString()
+                def new_meta = meta + [ id: id ]
                 if (!fastq_2) {
-                    return [ meta.id, meta + [ single_end:true ], [ fastq_1 ] ]
+                    return [ id, new_meta + [ single_end:true ], [ fastq_1 ] ]
                 } else {
-                    return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ] ]
+                    return [ id, new_meta + [ single_end:false ], [ fastq_1, fastq_2 ] ]
                 }
         }
         .groupTuple()
