@@ -25,6 +25,28 @@
                 "errorMessage": "Library name must be provided and cannot contain spaces; one row per library when a sample has multiple",
                 "meta": ["library"]
             },
+            "attempt": {
+                "type": ["string", "integer"],
+                "errorMessage": "Attempt (optional): sequencing-attempt counter. Currently informational; safe to omit or set to 1.",
+                "meta": ["attempt"]
+            },
+            "flowcell": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "Flowcell (optional): flowcell identifier. Used as the first component of the BWA read-group ID (ID:<flowcell>.<lane>.<index>). Defaults to 'UNNAMED' when omitted.",
+                "meta": ["flowcell"]
+            },
+            "lane": {
+                "type": ["string", "integer"],
+                "errorMessage": "Lane (optional): sequencing lane number. Used as the second component of the BWA read-group ID. Defaults to 1 when omitted.",
+                "meta": ["lane"]
+            },
+            "index_sequence": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "Index_sequence (optional): barcode index. Used as the third component of the BWA read-group ID. Defaults to 'NNNNNNNN' when omitted.",
+                "meta": ["index_sequence"]
+            },
             "r1": {
                 "type": "string",
                 "format": "file-path",
